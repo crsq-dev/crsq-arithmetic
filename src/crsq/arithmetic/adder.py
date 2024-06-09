@@ -356,7 +356,7 @@ def scoadder_gate(n: int, y: int, label="scoadd", use_gates: bool=False) -> Gate
     """ Create a signed constant adder gate.
 
         Usage:
-            qc.append(scoadder_gate(n, y), [b1,...,bn+1, c1,...,cn])
+            qc.append(scoadder_gate(n, y), [b1,...,bn, c1,...,cn-1])
         
         Effect:
             [y, b, c=0] -> [y, b+y, c=0]
