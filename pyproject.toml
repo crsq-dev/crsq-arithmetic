@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name="crsq-arithmetic"
-version="0.0.1"
+version="0.1.0"
 dependencies = [
     "qiskit >= 1.0",
-    "crsq-heap >= 0.0.1"
+    "crsq-heap >= 0.1.0"
 ]
 
 authors = [
