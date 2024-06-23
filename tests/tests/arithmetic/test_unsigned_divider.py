@@ -5,7 +5,6 @@ from qiskit import QuantumCircuit, QuantumRegister
 import crsq_arithmetic as ari
 import crsq_arithmetic.test_tools as test_tools
 
-
 def build_divider_with_values(aval: int, bval: int,
                               m: int, n: int, ug: bool):
     """ build an n bit divider circuit

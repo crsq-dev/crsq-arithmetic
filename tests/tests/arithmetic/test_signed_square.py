@@ -5,7 +5,6 @@ from qiskit import QuantumCircuit, QuantumRegister
 import crsq_arithmetic as ari
 import crsq_arithmetic.test_tools as test_tools
 
-
 def build_square_with_values(aval, n: int, use_bit_gates, use_gate_version):
     """ build an n bit square gate circuit
         aval, bval : operands

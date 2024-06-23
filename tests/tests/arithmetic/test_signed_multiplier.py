@@ -5,7 +5,6 @@ from qiskit import QuantumCircuit, QuantumRegister
 import crsq_arithmetic as ari
 import crsq_arithmetic.test_tools as test_tools
 
-
 def build_multiplier_with_values(aval, bval, n: int, ug: bool):
     """ build an n bit square circuit
         aval, bval : operands

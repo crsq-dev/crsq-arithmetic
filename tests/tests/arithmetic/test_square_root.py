@@ -7,7 +7,6 @@ from qiskit import QuantumCircuit, QuantumRegister
 import crsq_arithmetic as ari
 import crsq_arithmetic.test_tools as test_tools
 
-
 def build_square_root_with_values(zval: int, n: int, use_bit_gates: bool, use_gate_version: bool):
     """ build an n bit square root circuit
         zval : value to take square root

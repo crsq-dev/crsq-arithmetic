@@ -5,7 +5,6 @@ import crsq_arithmetic as ari
 import crsq_arithmetic.bit_ops as bb
 import crsq_arithmetic.test_tools as test_tools
 
-
 def do_qsum(in_bits: list[int], out_bits: list[int], use_gate):
     """ test carry for one set of inputs and compare with expected output.
         in_bits: [ cin, a, b ]

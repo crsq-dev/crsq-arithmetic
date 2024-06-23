@@ -5,7 +5,6 @@ from qiskit import QuantumCircuit, QuantumRegister
 import crsq_arithmetic as ari
 import crsq_arithmetic.test_tools as test_tools
 
-
 def build_subtractor_with_values(aval, bval, n, use_bit_gates: bool, use_gate_version: bool):
     """ build an n bit subtracter circuit
     """

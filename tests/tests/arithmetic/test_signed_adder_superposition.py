@@ -3,7 +3,6 @@
 from qiskit_aer import Aer
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit import transpile
-from qiskit.visualization import plot_histogram
 
 import crsq_arithmetic as ari
 
