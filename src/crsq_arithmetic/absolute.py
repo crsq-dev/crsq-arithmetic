@@ -2,8 +2,8 @@
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
 from qiskit.circuit.quantumcircuit import QubitSpecifier
-from crsq.arithmetic.adder import scoadder_gate
-import crsq.arithmetic.utils as ut
+from crsq_arithmetic.adder import scoadder_gate
+import crsq_arithmetic.utils as ut
 
 def absolute(qc: QuantumCircuit, ar: QuantumRegister, sb: QubitSpecifier,
              cr: QuantumRegister):

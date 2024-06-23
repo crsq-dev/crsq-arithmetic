@@ -5,7 +5,7 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit import transpile
 from qiskit.visualization import plot_histogram
 
-import crsq.arithmetic as ari
+import crsq_arithmetic as ari
 
 def run_and_get_histogram(qc: QuantumCircuit) -> dict:
     """ run a simulation and return counts

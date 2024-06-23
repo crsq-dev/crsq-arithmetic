@@ -4,8 +4,8 @@ import math
 
 from qiskit import QuantumCircuit, QuantumRegister
 
-import crsq.arithmetic as ari
-from crsq.arithmetic import ast, test_tools
+import crsq_arithmetic as ari
+from crsq_arithmetic import ast, test_tools
 
 def do_set_value(total_bits: int, fraction_bits: int, value: float,
                  min_value: int, max_value: int, expected_int_val: int):

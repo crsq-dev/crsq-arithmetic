@@ -1,9 +1,9 @@
 """ Square Root gates
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
-from crsq.arithmetic.adder import controlled_unsigned_adderv, controlled_unsigned_adderv_gate
-from crsq.arithmetic.subtractor import unsigned_subtractorv, unsigned_subtractorv_gate
-import crsq.arithmetic.utils as ut
+from crsq_arithmetic.adder import controlled_unsigned_adderv, controlled_unsigned_adderv_gate
+from crsq_arithmetic.subtractor import unsigned_subtractorv, unsigned_subtractorv_gate
+import crsq_arithmetic.utils as ut
 
 def square_root(qc: QuantumCircuit,
                 zr: QuantumRegister,

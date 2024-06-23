@@ -1,8 +1,8 @@
 """ Square product functions
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
-from crsq.arithmetic.adder import signed_adder, signed_adder_gate, unsigned_adder, unsigned_adder_gate, unsigned_adderv, unsigned_adderv_gate
-import crsq.arithmetic.utils as ut
+from crsq_arithmetic.adder import signed_adder, signed_adder_gate, unsigned_adder, unsigned_adder_gate, unsigned_adderv, unsigned_adderv_gate
+import crsq_arithmetic.utils as ut
 
 
 def unsigned_square(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,

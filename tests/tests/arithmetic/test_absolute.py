@@ -3,8 +3,8 @@
 
 from qiskit.circuit import QuantumCircuit, QuantumRegister
 
-import crsq.arithmetic as ari
-import crsq.arithmetic.test_tools as test_tools
+import crsq_arithmetic as ari
+import crsq_arithmetic.test_tools as test_tools
 
 def build_absolute_circ_for(n: int, a: int):
     """ build test circuit for scoadder"""

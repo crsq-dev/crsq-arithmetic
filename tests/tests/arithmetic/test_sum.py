@@ -1,9 +1,9 @@
 """ Test for the sum gates.
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister
-import crsq.arithmetic as ari
-import crsq.arithmetic.bit_ops as bb
-import crsq.arithmetic.test_tools as test_tools
+import crsq_arithmetic as ari
+import crsq_arithmetic.bit_ops as bb
+import crsq_arithmetic.test_tools as test_tools
 
 
 def do_qsum(in_bits: list[int], out_bits: list[int], use_gate):

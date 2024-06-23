@@ -2,8 +2,8 @@
 """
 from qiskit import QuantumCircuit, QuantumRegister
 
-import crsq.arithmetic as ari
-import crsq.arithmetic.test_tools as test_tools
+import crsq_arithmetic as ari
+import crsq_arithmetic.test_tools as test_tools
 
 def do_subtract(aval, bval, n, use_bit_gates, use_gate_version):
     """ Test adding two 3bit unsinged integers

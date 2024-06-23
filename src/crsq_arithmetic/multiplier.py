@@ -2,9 +2,9 @@
 """
 
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
-from crsq.arithmetic.adder import unsigned_adder, unsigned_adder_gate
+from crsq_arithmetic.adder import unsigned_adder, unsigned_adder_gate
 
-import crsq.arithmetic.utils as ut
+import crsq_arithmetic.utils as ut
 
 
 def unsigned_multiplier(qc: QuantumCircuit, ar: QuantumRegister,

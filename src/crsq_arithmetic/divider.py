@@ -1,9 +1,9 @@
 """ Divider gates
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
-from crsq.arithmetic.adder import controlled_signed_adder, controlled_signed_adder_gate
-from crsq.arithmetic.subtractor import unsigned_subtractor, unsigned_subtractor_gate
-import crsq.arithmetic.utils as ut
+from crsq_arithmetic.adder import controlled_signed_adder, controlled_signed_adder_gate
+from crsq_arithmetic.subtractor import unsigned_subtractor, unsigned_subtractor_gate
+import crsq_arithmetic.utils as ut
 
 
 def unsigned_divider(qc: QuantumCircuit,

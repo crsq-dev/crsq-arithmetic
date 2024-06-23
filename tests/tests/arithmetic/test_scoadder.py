@@ -2,8 +2,8 @@
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister
 
-import crsq.arithmetic as ari
-import crsq.arithmetic.test_tools as test_tools
+import crsq_arithmetic as ari
+import crsq_arithmetic.test_tools as test_tools
 
 def build_scoadder_circ_for(n: int, y: int, b: int, use_bit_gates, use_gate_version):
     """ build test circuit for scoadder"""

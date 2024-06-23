@@ -2,8 +2,8 @@
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
 
-import crsq.arithmetic.bit_ops as bb
-import crsq.arithmetic.utils as ut
+import crsq_arithmetic.bit_ops as bb
+import crsq_arithmetic.utils as ut
 
 
 def unsigned_subtractor(qc: QuantumCircuit, ar: QuantumRegister,

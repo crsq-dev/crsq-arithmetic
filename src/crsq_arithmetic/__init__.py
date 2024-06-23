@@ -3,7 +3,7 @@
 
     The suggested usage is::
 
-        import crsq.arithmetic as ari
+        import crsq_arithmetic as ari
 
         def some_func(a, b, c):
             ari.signed_adder(a,b,c)
@@ -42,7 +42,7 @@
       - :py:func:`absolute`, :py:func:`absolute_gate` - absolute value
     
 """
-from crsq.arithmetic.adder import (
+from crsq_arithmetic.adder import (
     scoadder, scoadder_gate,
     signed_adder, signed_adder_gate,
     signed_adderv, signed_adderv_gate,
@@ -62,7 +62,7 @@ names = [
     "controlled_signed_adder", "controlled_signed_adderv"
 ]
 
-from crsq.arithmetic.subtractor import (
+from crsq_arithmetic.subtractor import (
     signed_subtractor, signed_subtractor_gate,
     signed_cosubtractor, signed_cosubtractor_gate,
     signed_subtractorv, signed_subtractorv_gate,
@@ -78,7 +78,7 @@ names += [
     "unsigned_subtractorv", "unsigned_subtractorv_gate"
 ]
 
-from crsq.arithmetic.multiplier import (
+from crsq_arithmetic.multiplier import (
     signed_multiplier, signed_multiplier_gate,
     unsigned_multiplier, unsigned_multiplier_gate
 )
@@ -88,7 +88,7 @@ names += [
     "unsigned_multiplier", "unsigned_multiplier_gate"
 ]
 
-from crsq.arithmetic.square import (
+from crsq_arithmetic.square import (
     signed_square, signed_square_gate,
     unsigned_square, unsigned_square_gate
 )
@@ -98,7 +98,7 @@ names += [
     "unsigned_square", "unsigned_square_gate"
 ]
 
-from crsq.arithmetic.divider import (
+from crsq_arithmetic.divider import (
     unsigned_divider, unsigned_divider_gate
 )
 
@@ -106,7 +106,7 @@ names += [
     "unsigned_divider", "unsigned_divider_gate"
 ]
 
-from crsq.arithmetic.square_root import (
+from crsq_arithmetic.square_root import (
     square_root, square_root_gate
 )
 
@@ -114,7 +114,7 @@ names += [
     "square_root", "square_root_gate"
 ]
 
-from crsq.arithmetic.absolute import (
+from crsq_arithmetic.absolute import (
     absolute, absolute_gate
 )
 
@@ -122,7 +122,7 @@ names += [
     "absolute", "absolute_gate"
 ]
 
-from crsq.arithmetic.utils import (
+from crsq_arithmetic.utils import (
     bitsize,
     register_range,
     set_bit,

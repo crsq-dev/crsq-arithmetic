@@ -14,8 +14,8 @@ from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.quantumcircuit import QubitSpecifier
 from qiskit.circuit import Gate
 
-import crsq.arithmetic as ari
-from crsq.heap import Frame
+import crsq_arithmetic as ari
+from crsq_heap.heap import Frame
 
 class Scope(abc.ABC):
     """ This is the factory class for AST leaf node objects.

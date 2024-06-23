@@ -4,8 +4,8 @@ from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
 from qiskit.circuit.library import C3XGate
 from qiskit.circuit.quantumcircuit import QubitSpecifier
 
-import crsq.arithmetic.bit_ops as bb
-import crsq.arithmetic.utils as ut
+import crsq_arithmetic.bit_ops as bb
+import crsq_arithmetic.utils as ut
 
 def unsigned_adder(qc: QuantumCircuit, ar: QuantumRegister,
                    br: QuantumRegister, cr: QuantumRegister, use_gates: bool=False):

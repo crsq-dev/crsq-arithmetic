@@ -2,8 +2,8 @@
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister
 
-import crsq.arithmetic as ari
-import crsq.arithmetic.test_tools as test_tools
+import crsq_arithmetic as ari
+import crsq_arithmetic.test_tools as test_tools
 
 def build_signed_cosubtractor_circ_for(n: int, y: int, b: int, use_bit_gates: bool, use_gate_version: bool):
     """ build test circuit for signed_cosubtractor"""

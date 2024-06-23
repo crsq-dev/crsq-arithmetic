@@ -4,8 +4,8 @@ import math
 
 from qiskit import QuantumCircuit, QuantumRegister
 
-import crsq.arithmetic as ari
-import crsq.arithmetic.test_tools as test_tools
+import crsq_arithmetic as ari
+import crsq_arithmetic.test_tools as test_tools
 
 
 def build_square_root_with_values(zval: int, n: int, use_bit_gates: bool, use_gate_version: bool):
