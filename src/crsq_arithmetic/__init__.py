@@ -62,6 +62,12 @@ names = [
     "controlled_signed_adder", "controlled_signed_adderv"
 ]
 
+from crsq_arithmetic.cdk_adder import (
+    cdk_adder, cdk_adder_gate
+)
+
+names += [ "cdk_adder", "cdk_adder_gate" ]
+
 from crsq_arithmetic.subtractor import (
     signed_subtractor, signed_subtractor_gate,
     signed_cosubtractor, signed_cosubtractor_gate,
@@ -96,6 +102,16 @@ from crsq_arithmetic.square import (
 names += [
     "signed_square", "signed_square_gate",
     "unsigned_square", "unsigned_square_gate"
+]
+
+from crsq_arithmetic.square2 import (
+    signed_square2, signed_square2_gate,
+    unsigned_square2, unsigned_square2_gate
+)
+
+names += [
+    "signed_square2", "signed_square2_gate",
+    "unsigned_square2", "unsigned_square2_gate"
 ]
 
 from crsq_arithmetic.divider import (
@@ -136,5 +152,13 @@ names += [
     "set_bit",
     "set_bits",
     "set_value"
+]
+
+from crsq_arithmetic.vsqrom import (
+    vsqrom1, vsqrom2
+)
+
+names += [
+    "vsqrom1", "vsqrom2"
 ]
 __all__ = names

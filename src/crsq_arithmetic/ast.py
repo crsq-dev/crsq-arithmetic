@@ -83,6 +83,10 @@ class Scope(abc.ABC):
     @abc.abstractmethod
     def set_verbose(self, flag: bool):
         """ Sets verbose flag."""
+    
+    @abc.abstractmethod
+    def set_use_square2(self, flag: bool):
+        """ Set to use square2 gate."""
 
 class Value:
     """ abstract base class """
@@ -925,8 +929,12 @@ class Square(UnaryOp):
         self.max_value = int(max(values))
         # self.register = scope._new_register('d', self.total_bits)
         self.register = scope.allocate_ancilla_register(self.total_bits, 'square')
-        self.carry1_bits = max(3, operand.total_bits - 1)
-        self.carry2_bits = operand.total_bits
+        if self.scope.use_square2:
+            self.carry1_bits = operand.total_bits
+            self.carry2_bits = 1
+        else:
+            self.carry1_bits = max(3, operand.total_bits - 1)
+            self.carry2_bits = operand.total_bits
 
     def release(self):
         self.scope.free_ancilla_register(self.register)
@@ -934,8 +942,8 @@ class Square(UnaryOp):
     def emit_circuit(self):
         if not isinstance(self.operand, QuantumValue):
             raise ValueError("Combination not implemented.")
-        carry1 = self.scope.allocate_temp_register(self.carry1_bits, 'c')
-        carry2 = self.scope.allocate_temp_register(self.carry2_bits, 'c')
+        carry1 = self.scope.allocate_temp_register(self.carry1_bits, 'c1')
+        carry2 = self.scope.allocate_temp_register(self.carry2_bits, 'c2')
         qc = self.scope.circuit
         if self.scope.is_verbose:
             print(f"signed_square ar:{self.operand.register_name_with_precision()}, " +
@@ -943,12 +951,20 @@ class Square(UnaryOp):
                 f"dr:{self.register_name_with_precision()}")
         if self.scope.use_gates:
             # argument order ar, dr, cr1, cr2: dr = ar * ar
-            qc.append(ari.signed_square_gate(self.operand.register.size),
-                      self.operand.register[:] + self.register[:] +
-                      carry1[:] + carry2[:])
+            if self.scope.use_square2:
+                qc.append(ari.signed_square2_gate(self.operand.register.size),
+                        self.operand.register[:] + self.register[:] +
+                        carry1[:] + carry2[:])
+            else:
+                qc.append(ari.signed_square_gate(self.operand.register.size),
+                        self.operand.register[:] + self.register[:] +
+                        carry1[:] + carry2[:])
         else:
             # argument order qc, ar, cr1, cr2, dr: dr = ar * ar
-            ari.signed_square(qc, self.operand.register, self.register, carry1, carry2)
+            if self.scope.use_square2:
+                ari.signed_square2(qc, self.operand.register, self.register, carry1, carry2)
+            else:
+                ari.signed_square(qc, self.operand.register, self.register, carry1, carry2)
         self.scope.free_temp_register(carry2)
         self.scope.free_temp_register(carry1)
 
@@ -963,7 +979,10 @@ class Square(UnaryOp):
                 f"cr1:{carry1.name}, cr2:{carry2.name}, " +
                 f"dr:{self.register_name_with_precision()}")
         # argument order ar, dr, cr1, cr2: dr = ar * ar
-        inv_gate = _make_dagger_gate(ari.signed_square_gate(self.operand.register.size))
+        if self.scope.use_square2:
+            inv_gate = _make_dagger_gate(ari.signed_square2_gate(self.operand.register.size))
+        else:
+            inv_gate = _make_dagger_gate(ari.signed_square_gate(self.operand.register.size))
         qc.append(inv_gate, self.operand.register[:] + self.register[:] +
                   carry1[:] + carry2[:])
         self.scope.free_temp_register(carry2)
@@ -1065,6 +1084,7 @@ class _ScopeImp(Scope):
         self.pending_new_registers: list[QuantumRegister] = []
         self.serial_counters: dict[str, int] = {}
         self.is_verbose = is_verbose
+        self.use_square2 = True
 
     def close(self):
         if self.is_closed:
@@ -1236,6 +1256,9 @@ class _ScopeImp(Scope):
     def set_verbose(self, flag):
         """ set the verbose flag. """
         self.is_verbose = flag
+
+    def set_use_square2(self, flag):
+        self.use_square2 = flag
 
 
 def new_scope(reg_set: Frame|QuantumCircuit, is_verbose=False) -> Scope:

@@ -382,7 +382,7 @@ def signed_adder(qc: QuantumCircuit, ar: QuantumRegister, br: QuantumRegister,
         :param qc: target circuit
         :param ar: left (n bits)
         :param br: right (n bits)
-        :param cr: carry (n bits)
+        :param cr: carry (n-1 bits)
     """
     n = ut.bitsize(ar)
     if not (ut.bitsize(br) == n and ut.bitsize(cr) == n-1):

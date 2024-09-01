@@ -20,7 +20,7 @@ def square_root(qc: QuantumCircuit,
         :param zr: operand (2*m bits)
         :param rr: root (m bits)
         :param wr: work (m+1 bits)
-        :param cr: carry (2*m bits)
+        :param cr: carry (2*m-1 bits)
     """
     nz = ut.bitsize(zr)
     nr = ut.bitsize(rr)

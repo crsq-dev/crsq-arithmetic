@@ -26,7 +26,7 @@ def unsigned_divider(qc: QuantumCircuit,
         :param zr: [in]left (m bits) / [out] lower mbits of qqrr
         :param zzr: [in] extra result (n bits) = 0 / [out] higher nbits of qqrr
         :param dr: right (n bits)
-        :param cr: carry (n bits)
+        :param cr: carry (n-1 bits)
     """
     m = ut.bitsize(zr)
     n = ut.bitsize(dr)
