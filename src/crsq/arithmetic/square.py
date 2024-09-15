@@ -1,7 +1,7 @@
 """ Square product functions
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
-from crsq.arithmetic.adder import signed_adder, signed_adder_gate, unsigned_adder, unsigned_adder_gate
+from crsq.arithmetic.adder import signed_adder, signed_adder_gate, unsigned_adder, unsigned_adder_gate, unsigned_adderv, unsigned_adderv_gate
 import crsq.arithmetic.utils as ut
 
 
@@ -105,7 +105,7 @@ def signed_square(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,
         :param cr2: carry for the internal adder (n-1 bits)
     """
     n = ut.bitsize(ar)
-    if not (n >= 2 and ut.bitsize(cr1) == n and ut.bitsize(cr2) == n - 1
+    if not (n >= 2 and ut.bitsize(cr1) == max(3,n-1) and ut.bitsize(cr2) == n
             and ut.bitsize(dr) == n*2):
         raise ValueError(
             f"size mismatch: ar[{ut.bitsize(ar)}], dr[{ut.bitsize(dr)}], " +
@@ -135,10 +135,14 @@ def signed_square(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,
             for k in range(n - 1 - j):
                 qc.ccx(ar[j], ar[j+k+1], cr1[k])
             qc.x(cr1[n-j-2])
-            qc.append(unsigned_adder_gate(n-j),
-                      ut.register_range(cr1, 0, n-j)[:] +
-                      ut.register_range(dr, j*2+2, n-j+1)[:] +
-                      ut.register_range(cr2, 0, n-j-1)[:])
+            highest_bit = min(n+3+j, 2*n-2)
+            lowest_bit = 2+j*2
+            breg_size = highest_bit - lowest_bit
+            areg_size = n-j-1
+            qc.append(unsigned_adderv_gate(areg_size, breg_size),
+                      ut.register_range(cr1, 0, areg_size)[:] +
+                      ut.register_range(dr, j*2+2, breg_size+1)[:] +
+                      ut.register_range(cr2, 0, breg_size-1)[:])
             qc.x(cr1[n-j-2])
             for k in range(n - 1 - j - 1, -1, -1):
                 qc.ccx(ar[j], ar[j+k+1], cr1[k])
@@ -175,9 +179,13 @@ def signed_square(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,
             for k in range(n - 1 - j):
                 qc.ccx(ar[j], ar[j+k+1], cr1[k])
             qc.x(cr1[n-j-2])
-            unsigned_adder(qc, ut.register_range(cr1, 0, n-j),
-                        ut.register_range(dr, j*2+2, n-j+1),
-                        ut.register_range(cr2, 0, n-j-1))
+            highest_bit = min(n+3+j, 2*n-2)
+            lowest_bit = 2+j*2
+            breg_size = highest_bit - lowest_bit
+            areg_size = n-j-1
+            unsigned_adderv(qc, ut.register_range(cr1, 0, areg_size),
+                        ut.register_range(dr, j*2+2, breg_size+1),
+                        ut.register_range(cr2, 0, breg_size-1))
             qc.x(cr1[n-j-2])
             for k in range(n - 1 - j - 1, -1, -1):
                 qc.ccx(ar[j], ar[j+k+1], cr1[k])
@@ -211,8 +219,8 @@ def signed_square_gate(n: int, label: str="ssquare", use_gates=False) -> Gate:
     """
     ar = QuantumRegister(n, name="a")
     dr = QuantumRegister(2*n, "d")
-    c1 = QuantumRegister(n, "c1")
-    c2 = QuantumRegister(n-1, "c2")
+    c1 = QuantumRegister(max(3,n-1), "c1")
+    c2 = QuantumRegister(n, "c2")
     qc = QuantumCircuit(ar, dr, c1, c2)
     signed_square(qc, ar, dr, c1, c2, use_gates=use_gates)
     return qc.to_gate(label=f"{label}({n})")

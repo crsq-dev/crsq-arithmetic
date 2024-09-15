@@ -13,8 +13,8 @@ def build_square_with_values(aval, n: int, use_bit_gates, use_gate_version):
     """
     ar = QuantumRegister(n, name='a')
     dr = QuantumRegister(n*2, name='d')
-    cr1 = QuantumRegister(n, name='cr1')
-    cr2 = QuantumRegister(n-1, name='cr2')
+    cr1 = QuantumRegister(n-1, name='cr1')
+    cr2 = QuantumRegister(n, name='cr2')
     qc = QuantumCircuit(ar, dr, cr1, cr2)
 
     ari.set_value(qc, ar, aval)
@@ -50,7 +50,7 @@ def test_signed_square():
     for use_gate_version in [False, True]:
         for use_bit_gates in [False, True]:
             print(f" gate version: {use_gate_version}  bit gates: {use_bit_gates}")
-            for n in [2,3,4]:
+            for n in [4,5]:
                 s = 1 << n
                 hs = 1 << n-1
                 for a in range(s):

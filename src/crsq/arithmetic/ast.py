@@ -925,8 +925,8 @@ class Square(UnaryOp):
         self.max_value = int(max(values))
         # self.register = scope._new_register('d', self.total_bits)
         self.register = scope.allocate_ancilla_register(self.total_bits, 'square')
-        self.carry1_bits = operand.total_bits
-        self.carry2_bits = operand.total_bits - 1
+        self.carry1_bits = max(3, operand.total_bits - 1)
+        self.carry2_bits = operand.total_bits
 
     def release(self):
         self.scope.free_ancilla_register(self.register)
