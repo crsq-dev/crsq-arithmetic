@@ -84,6 +84,12 @@ names += [
     "unsigned_subtractorv", "unsigned_subtractorv_gate"
 ]
 
+from crsq_arithmetic.cdk_subtractor import (
+    cdk_subtractor, cdk_subtractor_gate
+)
+
+names += [ "cdk_subtractor", "cdk_subtractor_gate" ]
+
 from crsq_arithmetic.multiplier import (
     signed_multiplier, signed_multiplier_gate,
     unsigned_multiplier, unsigned_multiplier_gate
@@ -120,6 +126,14 @@ from crsq_arithmetic.divider import (
 
 names += [
     "unsigned_divider", "unsigned_divider_gate"
+]
+
+from crsq_arithmetic.cdk_divider import (
+    unsigned_cdk_divider, unsigned_cdk_divider_gate
+)
+
+names += [
+    "unsigned_cdk_divider", "unsigned_cdk_divider_gate"
 ]
 
 from crsq_arithmetic.square_root import (

@@ -53,7 +53,7 @@ def test_signed_square2():
             s = 1 << n
             hs = 1 << n-1
             for a in range(s):
-                print(f"n={n} a={a}")
+                print(f"n={n} a={a-hs}")
                 do_square2(a-hs, n, use_gate_version)
 
 

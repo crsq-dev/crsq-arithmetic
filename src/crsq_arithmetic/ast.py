@@ -32,10 +32,10 @@ class Scope(abc.ABC):
         a private class defined later in the file.
     """
 
-    def __init__(self):
-        self.reg_set: Frame
-        self.circuit: QuantumCircuit
-        self.use_gates: bool
+    # def __init__(self):
+    #     self.reg_set: Frame
+    #     self.circuit: QuantumCircuit
+    #     self.use_gates: bool
 
     def close(self):
         """ release resources """
@@ -780,7 +780,10 @@ class Divide(BinaryOp):
         self.signed = False
         self.total_bits = n
         self.fraction_bits = left.fraction_bits - right.fraction_bits
-        self.carry_bits = m-1
+        if scope.use_cdk_divider:
+            self.carry_bits = 1
+        else:
+            self.carry_bits = m-1
         # self.zz_register = self.scope._new_register('zz', m)
         self.zz_register = self.scope.allocate_ancilla_register(m, 'zz')
         self._make_qq_alias()
@@ -814,12 +817,21 @@ class Divide(BinaryOp):
                 f"zzr:{self.zz_register.name}, dr:{self.right.register_name_with_precision()}, " +
                 f"cr:{carry.name} qr:{self.register_name_with_precision()}")
         if self.scope.use_gates:
-            qc.append(ari.unsigned_divider_gate(self.left.total_bits, self.right.total_bits),
-                      self.left.register[:] + self.zz_register[:] +
-                      self.right.register[:] + carry[:])
+            if self.scope.use_cdk_divider:
+                qc.append(ari.unsigned_cdk_divider_gate(self.left.total_bits, self.right.total_bits),
+                        self.left.register[:] + self.zz_register[:] +
+                        self.right.register[:] + carry[:])
+            else:
+                qc.append(ari.unsigned_divider_gate(self.left.total_bits, self.right.total_bits),
+                        self.left.register[:] + self.zz_register[:] +
+                        self.right.register[:] + carry[:])
         else:
-            ari.unsigned_divider(qc, self.left.register, self.zz_register,
-                                 self.right.register, carry)
+            if self.scope.use_cdk_divider:
+                ari.unsigned_cdk_divider(qc, self.left.register, self.zz_register,
+                                         self.right.register, carry)
+            else:
+                ari.unsigned_divider(qc, self.left.register, self.zz_register,
+                                    self.right.register, carry)
         self.scope.free_temp_register(carry)
 
     def _emit_inverse_circuit(self):
@@ -831,8 +843,12 @@ class Divide(BinaryOp):
             print(f"inv unsigned_divider zr:{self.left.register_name_with_precision()}, " +
                 f"zzr:{self.zz_register.name}, dr:{self.right.register_name_with_precision()}, " +
                 f"cr:{carry.name} qr:{self.register_name_with_precision()}")
-        inv_gate = _make_dagger_gate(
-            ari.unsigned_divider_gate(self.left.total_bits, self.right.total_bits))
+        if self.scope.use_cdk_divider:
+            inv_gate = _make_dagger_gate(
+                ari.unsigned_cdk_divider_gate(self.left.total_bits, self.right.total_bits))
+        else:
+            inv_gate = _make_dagger_gate(
+                ari.unsigned_divider_gate(self.left.total_bits, self.right.total_bits))
         qc.append(inv_gate, self.left.register[:] + self.zz_register[:] +
                   self.right.register[:] + carry[:])
         self.scope.free_temp_register(carry)
@@ -1085,6 +1101,7 @@ class _ScopeImp(Scope):
         self.serial_counters: dict[str, int] = {}
         self.is_verbose = is_verbose
         self.use_square2 = True
+        self.use_cdk_divider = True
 
     def close(self):
         if self.is_closed:
@@ -1259,6 +1276,9 @@ class _ScopeImp(Scope):
 
     def set_use_square2(self, flag):
         self.use_square2 = flag
+    
+    def set_use_cdk_divider(self, flag):
+        self.use_cdk_divider = flag
 
 
 def new_scope(reg_set: Frame|QuantumCircuit, is_verbose=False) -> Scope:
