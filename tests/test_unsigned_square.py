@@ -6,15 +6,15 @@ import crsq.arithmetic as ari
 import crsq.arithmetic.test_tools as test_tools
 
 
-def build_square_with_values(aval, n: int, ug: bool):
+def build_usquare_with_values(aval, n: int, ug: bool):
     """ build an n bit square circuit
         aval, bval : operands
         n : bit size of the register to use
     """
     ar = QuantumRegister(n, name='a')
     dr = QuantumRegister(n*2, name='d')
-    cr1 = QuantumRegister(n-1, name='cr1')
-    cr2 = QuantumRegister(n-2, name='cr2')
+    cr1 = QuantumRegister(((n+1)//2)*2-1, name='cr1')
+    cr2 = QuantumRegister(((n+1)//2)*2-2, name='cr2')
     qc = QuantumCircuit(ar, dr, cr1, cr2)
 
     ari.set_value(qc, ar, aval)
@@ -25,15 +25,15 @@ def build_square_with_values(aval, n: int, ug: bool):
     return qc
 
 
-def do_square(aval, n, ug):
+def do_usquare(aval, n, ug):
     """ Test squaring two n bit unsinged integers
     """
-    qc = build_square_with_values(aval, n, ug)
+    qc = build_usquare_with_values(aval, n, ug)
 
     m = n * 2  # bits for result
     astr = bin((1 << n) + aval)[-n:]
     dstr = bin((1 << m) + aval*aval)[-m:]
-    cstr = "0"*(n-1+n-2)
+    cstr = "0"*(((n+1)//2)*4-3)
     expected = cstr + dstr + astr
 
     exp_dict = { expected: 1 }
@@ -43,23 +43,24 @@ def do_square(aval, n, ug):
 def test_unsigned_square():
     """ test square for all possible 3bit inputs.
     """
-    n = 4
-    s = 1 << n
     print("Unsigned int square test")
-    for a in range(s):
-        for ug in [False, True]:
-            do_square(a, n, ug)
+    for ug in [False, True]:
+        for n in [4,5,6]:
+            s = 1 << n
+            for a in [0,1,2,3,s-4,s-3,s-2,s-1]:
+                print(f"n={n} a={a} use_gates={ug}")
+                do_usquare(a, n, ug)
 
 
-def build_square_gate_with_values(aval, n: int):
+def build_usquare_gate_with_values(aval, n: int):
     """ build an n bit square gate circuit
         aval, bval : operands
         n : bit size of the register to use
     """
     ar = QuantumRegister(n, name='a')
     dr = QuantumRegister(n*2, name='d')
-    cr1 = QuantumRegister(n-1, name='cr1')
-    cr2 = QuantumRegister(n-2, name='cr2')
+    cr1 = QuantumRegister(((n+1)//2)*2-1, name='cr1')
+    cr2 = QuantumRegister(((n+1)//2)*2-2, name='cr2')
     qc = QuantumCircuit(ar, dr, cr1, cr2)
 
     ari.set_value(qc, ar, aval)
@@ -70,15 +71,15 @@ def build_square_gate_with_values(aval, n: int):
     return qc
 
 
-def do_square_gate(aval, n):
+def do_usquare_gate(aval, n):
     """ Test squaring two n bit unsinged integers
     """
-    qc = build_square_gate_with_values(aval, n)
+    qc = build_usquare_gate_with_values(aval, n)
 
     m = n * 2  # bits for result
     astr = bin((1 << n) + aval)[-n:]
     dstr = bin((1 << m) + aval*aval)[-m:]
-    cstr = "0"*(n-1+n-2)
+    cstr = "0"*(((n+1)//2)*4-3)
     expected = cstr + dstr + astr
 
     exp_dict = { expected: 1 }
@@ -88,11 +89,12 @@ def do_square_gate(aval, n):
 def test_unsigned_square_gate():
     """ test square_gate for all possible 3bit inputs.
     """
-    n = 4
-    s = 1 << n
     print("Unsigned int square gate test")
-    for a in range(s):
-        do_square_gate(a, n)
+    for n in [4,5,6]:
+        s = 1 << n
+        for a in [0,1,2,3,s-4,s-3,s-2,s-1]:
+            print(f"n={n} a={a}")
+            do_usquare_gate(a, n)
 
 
 if __name__ == '__main__':

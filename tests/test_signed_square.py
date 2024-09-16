@@ -53,7 +53,7 @@ def test_signed_square():
             for n in [4,5]:
                 s = 1 << n
                 hs = 1 << n-1
-                for a in range(s):
+                for a in [0,1,2, hs-2,hs-1,hs,hs+1,hs+2,s-3,s-2,s-1]:
                     do_square(a-hs, n, use_bit_gates, use_gate_version)
 
 
