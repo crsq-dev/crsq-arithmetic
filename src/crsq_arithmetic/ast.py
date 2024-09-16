@@ -946,7 +946,7 @@ class Square(UnaryOp):
         # self.register = scope._new_register('d', self.total_bits)
         self.register = scope.allocate_ancilla_register(self.total_bits, 'square')
         if self.scope.use_square2:
-            self.carry1_bits = operand.total_bits
+            self.carry1_bits = operand.total_bits + 1
             self.carry2_bits = 1
         else:
             self.carry1_bits = ((operand.total_bits+1)//2)*2-1

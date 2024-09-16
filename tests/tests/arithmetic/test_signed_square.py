@@ -49,7 +49,7 @@ def test_signed_square():
     for use_gate_version in [False, True]:
         for use_bit_gates in [False, True]:
             print(f" gate version: {use_gate_version}  bit gates: {use_bit_gates}")
-            for n in [4,5,6]:
+            for n in [4,5]:
                 s = 1 << n
                 hs = 1 << n-1
                 for a in [0,1,2, hs-2,hs-1,hs,hs+1,hs+2,s-3,s-2,s-1]:

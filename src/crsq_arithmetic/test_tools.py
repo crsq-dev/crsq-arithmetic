@@ -3,7 +3,8 @@
 
 from typing import Any
 from qiskit_aer import AerSimulator
-from qiskit import QuantumCircuit, transpile
+from qiskit import QuantumCircuit
+from qiskit.compiler import transpile
 from qiskit.quantum_info import Statevector
 
 def _pack_expected_dict(expected: dict[str,complex|float]):
