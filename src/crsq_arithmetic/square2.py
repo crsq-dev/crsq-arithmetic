@@ -88,11 +88,11 @@ def signed_square2(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,
         :param qc: target circuit
         :param ar: operand (n bits, n >= 2)
         :param dr: product (2*n bits)
-        :param cr1: carry for the multiplier (n bits)
+        :param cr1: carry for the multiplier (n+1 bits)
         :param cr2: carry for the internal adder (1 bits)
     """
     n = ut.bitsize(ar)
-    if not (n >= 2 and ut.bitsize(cr1) == n and ut.bitsize(cr2) == 1
+    if not (n >= 2 and ut.bitsize(cr1) == n+1 and ut.bitsize(cr2) == 1
             and ut.bitsize(dr) == n*2):
         raise ValueError(
             f"size mismatch: ar[{ut.bitsize(ar)}], dr[{ut.bitsize(dr)}], " +
@@ -125,10 +125,18 @@ def signed_square2(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,
         #             ut.register_range(cr1, 0, n-j)[:] +
         #             ut.register_range(dr, j*2+2, n-j+1)[:] +
         #             ut.register_range(cr2, 0, n-j-1)[:])
-        qc.append(CDKMRippleCarryAdder(n-j, kind='half', name='adder').to_gate(),
-                    ut.register_range(cr1, 0, n-j)[:] +
-                    ut.register_range(dr, j*2+2, n-j+1)[:] +
+        highest_bit = min(n+3+j, 2*n-2)
+        lowest_bit = 2+j*2
+        breg_size = highest_bit - lowest_bit
+        areg_size = n-j-1
+        qc.append(CDKMRippleCarryAdder(breg_size, kind='half', name='adder').to_gate(),
+                    ut.register_range(cr1, 0, breg_size)[:] +
+                    ut.register_range(dr, j*2+2, breg_size+1)[:] +
                     cr2[:])
+        # qc.append(CDKMRippleCarryAdder(n-j, kind='half', name='adder').to_gate(),
+        #             ut.register_range(cr1, 0, n-j)[:] +
+        #             ut.register_range(dr, j*2+2, n-j+1)[:] +
+        #             cr2[:])
         qc.x(cr1[n-j-2])
         for k in range(n - 1 - j - 1, -1, -1):
             qc.ccx(ar[j], ar[j+k+1], cr1[k])
@@ -167,7 +175,7 @@ def signed_square2_gate(n: int, label: str="ssquare") -> Gate:
     """
     ar = QuantumRegister(n, name="a")
     dr = QuantumRegister(2*n, "d")
-    c1 = QuantumRegister(n, "c1")
+    c1 = QuantumRegister(n+1, "c1")
     c2 = QuantumRegister(1, "c2")
     qc = QuantumCircuit(ar, dr, c1, c2)
     signed_square2(qc, ar, dr, c1, c2)

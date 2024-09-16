@@ -13,7 +13,7 @@ def build_square2_with_values(aval, n: int, use_gate_version):
     """
     ar = QuantumRegister(n, name='a')
     dr = QuantumRegister(n*2, name='d')
-    cr1 = QuantumRegister(n, name='cr1')
+    cr1 = QuantumRegister(n+1, name='cr1')
     cr2 = QuantumRegister(1, name='cr2')
     qc = QuantumCircuit(ar, dr, cr1, cr2)
 
@@ -36,7 +36,7 @@ def do_square2(aval, n, use_gate_version):
     m = n * 2  # bits for result
     astr = bin((1 << n) + aval)[-n:]
     dstr = bin((1 << m) + aval*aval)[-m:]
-    cstr = "0"*(n + 1)
+    cstr = "0"*(n + 2)
     expected = cstr + dstr + astr
 
     exp_dict = { expected: 1 }
@@ -52,7 +52,7 @@ def test_signed_square2():
         for n in [4,5,6]:
             s = 1 << n
             hs = 1 << n-1
-            for a in range(s):
+            for a in [0, 1, 2, 3, hs-1, hs, hs+1, s-4, s-3, s-2, s-1]:
                 print(f"n={n} a={a-hs}")
                 do_square2(a-hs, n, use_gate_version)
 
