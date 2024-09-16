@@ -436,7 +436,7 @@ def test_abs():
         do_abs(4, 3, 0, use_gates)
         do_abs(4, -6, 1, use_gates)
 
-def do_square(n: int, aval: int, use_gates: bool):
+def do_square(n: int, aval: int, use_gates: bool, use_square2: bool):
     """ test square """
     ra = QuantumRegister(n, 'a')
     qc = QuantumCircuit(ra)
@@ -444,6 +444,7 @@ def do_square(n: int, aval: int, use_gates: bool):
 
     scope = ast.new_scope(qc, is_verbose=True)
     scope.use_gates = use_gates
+    scope.set_use_square2(use_square2)
     a = scope.register(ra)
     _c = scope.square(a)  # Square
 
@@ -484,7 +485,8 @@ def do_square(n: int, aval: int, use_gates: bool):
 def test_square():
     """ test square """
     for use_gates in [False, True]:
-        do_square(4, -6, use_gates)
+        for use_square2 in [False, True]:
+            do_square(4, 3, use_gates, use_square2)
 
 def do_square_root(n: int, zval: int, use_gates: bool):
     """ test square root """

@@ -949,8 +949,8 @@ class Square(UnaryOp):
             self.carry1_bits = operand.total_bits
             self.carry2_bits = 1
         else:
-            self.carry1_bits = max(3, operand.total_bits - 1)
-            self.carry2_bits = operand.total_bits
+            self.carry1_bits = ((operand.total_bits+1)//2)*2-1
+            self.carry2_bits = (operand.total_bits//2)*2
 
     def release(self):
         self.scope.free_ancilla_register(self.register)

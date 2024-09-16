@@ -1,7 +1,7 @@
 """ Square product functions
 """
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate
-from crsq_arithmetic.adder import signed_adder, signed_adder_gate, unsigned_adder, unsigned_adder_gate, unsigned_adderv, unsigned_adderv_gate
+from crsq_arithmetic.adder import signed_adder, signed_adder_gate, unsigned_adder, unsigned_adder_gate, unsigned_adderv, unsigned_adderv_gate, signed_adderv, signed_adderv_gate
 import crsq_arithmetic.utils as ut
 
 
@@ -103,11 +103,11 @@ def signed_square(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,
         :param qc: target circuit
         :param ar: operand (n bits, n >= 2)
         :param dr: product (2*n bits)
-        :param cr1: carry for the multiplier (n bits)
-        :param cr2: carry for the internal adder (n-1 bits)
+        :param cr1: carry for the multiplier ( ((n+1)//2)*2-1 bits)
+        :param cr2: carry for the internal adder ( (n//2)*2 bits)
     """
     n = ut.bitsize(ar)
-    if not (n >= 2 and ut.bitsize(cr1) == max(3,n-1) and ut.bitsize(cr2) == n
+    if not (n >= 2 and ut.bitsize(cr1) == ((n+1)//2)*2-1 and ut.bitsize(cr2) == (n//2)*2
             and ut.bitsize(dr) == n*2):
         raise ValueError(
             f"size mismatch: ar[{ut.bitsize(ar)}], dr[{ut.bitsize(dr)}], " +
@@ -133,36 +133,52 @@ def signed_square(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,
             qc.cx(dr[n], dr[n+1])
             qc.x(dr[n])
 
-        for j in range(n - 3):
-            for k in range(n - 1 - j):
-                qc.ccx(ar[j], ar[j+k+1], cr1[k])
-            qc.x(cr1[n-j-2])
-            highest_bit = min(n+3+j, 2*n-2)
-            lowest_bit = 2+j*2
-            breg_size = highest_bit - lowest_bit
-            areg_size = n-j-1
-            qc.append(unsigned_adderv_gate(areg_size, breg_size),
-                      ut.register_range(cr1, 0, areg_size)[:] +
-                      ut.register_range(dr, j*2+2, breg_size+1)[:] +
-                      ut.register_range(cr2, 0, breg_size-1)[:])
-            qc.x(cr1[n-j-2])
-            for k in range(n - 1 - j - 1, -1, -1):
-                qc.ccx(ar[j], ar[j+k+1], cr1[k])
-        j = n - 3
-        qc.ccx(ar[j], ar[j+1], cr1[0])
-        qc.ccx(ar[j], ar[j+2], cr1[1])
-        qc.x(cr1[1])
-        qc.ccx(ar[j+1], ar[j+2], cr1[2])
-        qc.x(cr1[2])
-        qc.append(signed_adder_gate(3),
-                  ut.register_range(cr1, 0, 3)[:] +
-                  ut.register_range(dr, j*2+2, 3)[:] +
-                  ut.register_range(cr2, 0, 2)[:])
-        qc.x(cr1[2])
-        qc.ccx(ar[j+1], ar[j+2], cr1[2])
-        qc.x(cr1[1])
-        qc.ccx(ar[j], ar[j+2], cr1[1])
-        qc.ccx(ar[j], ar[j+1], cr1[0])
+        hn = n//2  # half of n
+        for j in range(hn):
+            # set up cr1
+            # count k from the LSB of carry1
+            sep = n - 2 - 2*j
+            for k in range(0, sep):
+                hk = (k+1)//2  # hk[k] = { 0, 1, 1, 2, 2, 3, 3, ... }
+                s = hk + j*2 + 1   # first bit in A
+                t = k - hk         # second bit in A
+                qc.ccx(ar[s], ar[t], cr1[k])
+            s = (n+1)//2 + j  # first bit in A
+            for k in range((n % 2)+1+j*2):
+                t = n - ((n+1)//2) - 1 - j + k  # second bit in A
+                qc.ccx(ar[s], ar[t], cr1[sep + k])
+                if s == n - 1:
+                    qc.x(cr1[sep+k])
+
+            areg_size = ((n+1)//2)*2 - 1
+            if j < hn - 1:
+                breg_size = min((n*2-1) - (2+2*j) - 1,  (n//2)*2 + 1)
+                qc.append(unsigned_adderv_gate(areg_size, breg_size),
+                        ut.register_range(cr1, 0, areg_size)[:] +
+                        ut.register_range(dr, j*2+2, breg_size+1)[:] +
+                        ut.register_range(cr2, 0, breg_size-1)[:])
+            else:
+                breg_size = ((n+1)//2)*2 - 1
+                qc.append(signed_adderv_gate(areg_size, breg_size),
+                        ut.register_range(cr1, 0, areg_size)[:] +
+                        ut.register_range(dr, j*2+2, breg_size)[:] +
+                        ut.register_range(cr2, 0, breg_size-1)[:])
+            # undo cr1
+            # count k from the LSB of carry1
+            sep = n - 2 - 2*j
+            s = (n+1)//2 + j  # first bit in A
+            for k in range((n % 2)+1+j*2-1,-1,-1):
+                if s == n - 1:
+                    qc.x(cr1[sep+k])
+                t = n - ((n+1)//2) - 1 - j + k  # second bit in A
+                qc.ccx(ar[s], ar[t], cr1[sep + k])
+            for k in range(sep-1,-1,-1):
+                hk = (k+1)//2  # hk[k] = { 0, 1, 1, 2, 2, 3, 3, ... }
+                s = hk + j*2 + 1   # first bit in A
+                t = k - hk         # second bit in A
+                qc.ccx(ar[s], ar[t], cr1[k])
+
+
     else:
         for k in range(n):
             qc.cx(ar[k], dr[k*2])
@@ -177,34 +193,48 @@ def signed_square(qc: QuantumCircuit, ar: QuantumRegister, dr: QuantumRegister,
             qc.cx(dr[n], dr[n+1])
             qc.x(dr[n])
 
-        for j in range(n - 3):
-            for k in range(n - 1 - j):
-                qc.ccx(ar[j], ar[j+k+1], cr1[k])
-            qc.x(cr1[n-j-2])
-            highest_bit = min(n+3+j, 2*n-2)
-            lowest_bit = 2+j*2
-            breg_size = highest_bit - lowest_bit
-            areg_size = n-j-1
-            unsigned_adderv(qc, ut.register_range(cr1, 0, areg_size),
-                        ut.register_range(dr, j*2+2, breg_size+1),
-                        ut.register_range(cr2, 0, breg_size-1))
-            qc.x(cr1[n-j-2])
-            for k in range(n - 1 - j - 1, -1, -1):
-                qc.ccx(ar[j], ar[j+k+1], cr1[k])
-        j = n - 3
-        qc.ccx(ar[j], ar[j+1], cr1[0])
-        qc.ccx(ar[j], ar[j+2], cr1[1])
-        qc.x(cr1[1])
-        qc.ccx(ar[j+1], ar[j+2], cr1[2])
-        qc.x(cr1[2])
-        signed_adder(qc, ut.register_range(cr1, 0, 3),
-                    ut.register_range(dr, j*2+2, 3),
-                    ut.register_range(cr2, 0, 2))
-        qc.x(cr1[2])
-        qc.ccx(ar[j+1], ar[j+2], cr1[2])
-        qc.x(cr1[1])
-        qc.ccx(ar[j], ar[j+2], cr1[1])
-        qc.ccx(ar[j], ar[j+1], cr1[0])
+        hn = n//2  # half of n
+        for j in range(hn):
+            # set up cr1
+            # count k from the LSB of carry1
+            sep = n - 2 - 2*j
+            for k in range(0, sep):
+                hk = (k+1)//2  # hk[k] = { 0, 1, 1, 2, 2, 3, 3, ... }
+                s = hk + j*2 + 1   # first bit in A
+                t = k - hk         # second bit in A
+                qc.ccx(ar[s], ar[t], cr1[k])
+            s = (n+1)//2 + j  # first bit in A
+            for k in range((n % 2)+1+j*2):
+                t = n - ((n+1)//2) - 1 - j + k  # second bit in A
+                qc.ccx(ar[s], ar[t], cr1[sep + k])
+                if s == n - 1:
+                    qc.x(cr1[sep+k])
+
+            areg_size = ((n+1)//2)*2 - 1
+            if j < hn - 1:
+                breg_size = min((n*2-1) - (2+2*j) - 1,  (n//2)*2 + 1)
+                unsigned_adderv(qc, ut.register_range(cr1, 0, areg_size),
+                            ut.register_range(dr, j*2+2, breg_size+1),
+                            ut.register_range(cr2, 0, breg_size-1))
+            else:
+                breg_size = ((n+1)//2)*2 - 1
+                signed_adderv(qc, ut.register_range(cr1, 0, areg_size),
+                            ut.register_range(dr, j*2+2, breg_size),
+                            ut.register_range(cr2, 0, breg_size-1))
+            # undo cr1
+            # count k from the LSB of carry1
+            sep = n - 2 - 2*j
+            s = (n+1)//2 + j  # first bit in A
+            for k in range((n % 2)+1+j*2-1,-1,-1):
+                if s == n - 1:
+                    qc.x(cr1[sep+k])
+                t = n - ((n+1)//2) - 1 - j + k  # second bit in A
+                qc.ccx(ar[s], ar[t], cr1[sep + k])
+            for k in range(sep-1,-1,-1):
+                hk = (k+1)//2  # hk[k] = { 0, 1, 1, 2, 2, 3, 3, ... }
+                s = hk + j*2 + 1   # first bit in A
+                t = k - hk         # second bit in A
+                qc.ccx(ar[s], ar[t], cr1[k])
 
 
 def signed_square_gate(n: int, label: str="ssquare", use_gates=False) -> Gate:
@@ -221,8 +251,8 @@ def signed_square_gate(n: int, label: str="ssquare", use_gates=False) -> Gate:
     """
     ar = QuantumRegister(n, name="a")
     dr = QuantumRegister(2*n, "d")
-    c1 = QuantumRegister(max(3,n-1), "c1")
-    c2 = QuantumRegister(n, "c2")
+    c1 = QuantumRegister(((n+1)//2)*2-1, "c1")
+    c2 = QuantumRegister((n//2)*2, "c2")
     qc = QuantumCircuit(ar, dr, c1, c2)
     signed_square(qc, ar, dr, c1, c2, use_gates=use_gates)
     return qc.to_gate(label=f"{label}({n})")

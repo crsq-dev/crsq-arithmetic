@@ -114,12 +114,11 @@ def _compare_dicts(qc: QuantumCircuit, result: dict, expected: dict):
                 error_count += 1
         else:
             if _round(v) != 0:
-                msg = (f"Unexpected: [{k} : {_decode_state_vector_string(qc, k)}] " +
-                       f": {v} should be 0")
+                msg = (f"Unexpected: [{k} : {_decode_state_vector_string(qc, k)}] , expected : {expected}")
                 print(msg)
                 error_count += 1
     if error_count > 0:
-        raise ValueError(f"{error_count} state(s) did not match expected value.")
+        raise ValueError(f"{error_count} state(s) did not match expected value : {expected}.")
 
 
 def run_circuit_and_check(qc: QuantumCircuit,
