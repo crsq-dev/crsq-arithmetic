@@ -785,7 +785,8 @@ class Divide(BinaryOp):
         else:
             self.carry_bits = m-1
         # self.zz_register = self.scope._new_register('zz', m)
-        self.zz_register = self.scope.allocate_ancilla_register(m, 'zz')
+        # self.zz_register = self.scope.allocate_ancilla_register(m, 'zz')
+        self.zz_register = self.scope.allocate_temp_register(m)
         self._make_qq_alias()
 
     def _expand_left(self) -> QuantumValue:
@@ -798,7 +799,8 @@ class Divide(BinaryOp):
         return new_left
 
     def release(self):
-        self.scope.free_ancilla_register(self.zz_register)
+        # self.scope.free_ancilla_register(self.zz_register)
+        self.scope.free_temp_register(self.zz_register)
 
     def _make_qq_alias(self):
         n = self.total_bits
@@ -810,6 +812,7 @@ class Divide(BinaryOp):
     def emit_circuit(self):
         if not (isinstance(self.left, QuantumValue) and isinstance(self.right, QuantumValue)):
             raise ValueError("Combination not implemented.")
+        m = self.right.total_bits
         carry = self.scope.allocate_temp_register(self.carry_bits)
         qc = self.scope.circuit
         if self.scope.is_verbose:
