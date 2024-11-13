@@ -90,6 +90,12 @@ from crsq_arithmetic.cdk_subtractor import (
 
 names += [ "cdk_subtractor", "cdk_subtractor_gate" ]
 
+from crsq_arithmetic.cdk_comparator import (
+    cdk_comparator, cdk_comparator_gate
+)
+
+names += [ "cdk_comparator", "cdk_comparator_gate" ]
+
 from crsq_arithmetic.multiplier import (
     signed_multiplier, signed_multiplier_gate,
     unsigned_multiplier, unsigned_multiplier_gate
