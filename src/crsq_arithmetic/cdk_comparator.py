@@ -163,7 +163,7 @@ def cdk_comparator_gate(n: int, label: str="cmp", opt_ctrl_state:str|None=None) 
           qc.append(unsigned_adder_gate(n), [a1,...,an, b1,...,bn+1, c1])
 
         Effect:
-          [a, b, c=0] -> [a, b+a, c=0]
+          [a, b, c=0] -> [a, b, c=1] when ar > br, otherwise cr = 0
         
         :param n: bit size of a
         :param label: label for the gate.
