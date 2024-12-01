@@ -158,6 +158,14 @@ names += [
     "absolute", "absolute_gate"
 ]
 
+from crsq_arithmetic.cdk_absolute import (
+    cdk_absolute, cdk_absolute_gate
+)
+
+names += [
+    "cdk_absolute", "cdk_absolute_gate"
+]
+
 from crsq_arithmetic.utils import (
     bitsize,
     register_range,
