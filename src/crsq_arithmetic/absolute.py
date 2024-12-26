@@ -32,17 +32,17 @@ def absolute_gate(n: int, label: str="abs") -> Gate:
     """ Create an absolute value gate.
 
         Usage:
-            qc.append(absolute_gate(n), [a1...an, c1...cn-1, s])
+            qc.append(absolute_gate(n), [a1...an, s, c1...cn-1])
         
         Effect:
-            [a, s=0, c = 0] -> [abs(a), sign_bit(b), c=0]
+            [a, s=0, c = 0] -> [abs(a), sign_bit(a), c=0]
 
         :param n: bit size of a
         :param label: label to put on the gate.
     """
     ar = QuantumRegister(n, name="a")
+    sr = QuantumRegister(1, name="s")
     cr = QuantumRegister(n-1, name="c")
-    sr = QuantumRegister(1, name="sb")
     qc = QuantumCircuit(ar, sr, cr)
     absolute(qc, ar, sr[0], cr)
     return qc.to_gate(label=f"{label}({n})")
