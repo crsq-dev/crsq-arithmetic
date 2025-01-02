@@ -31,7 +31,7 @@ def cdk_comparator(
     qc: QuantumCircuit, ar: QuantumRegister, br: QuantumRegister, cr: QuantumRegister,
     opt_ctrl_bit: QubitSpecifier|None=None, opt_ctrl_state:str="1"
 ):
-    """Emit an n bit adder circuit
+    """Emit an n bit comparator circuit
 
     Effect:
       [ar, br, cr=0] -> [ar, br, cr = 1] when ar > br, otherwise cr = 0
@@ -40,7 +40,7 @@ def cdk_comparator(
     :param ar: left (n bits)
     :param br: right (n+1 bits for unsigned, n for signed)
     :param cr: helper bit (1 bits)
-    :param is_unsigned: if True, unsigned adder is emitted.
+    :param opt_ctrl_bit: if not None, this will be used as a control bit.
     """
     n = ut.bitsize(ar)
     if not (n >= 2 and (ut.bitsize(br) == n+1) and ut.bitsize(cr) == 1):
