@@ -7,6 +7,89 @@ from qiskit.circuit.quantumcircuit import QubitSpecifier
 import crsq_arithmetic.bit_ops as bb
 import crsq_arithmetic.utils as ut
 
+def unsigned_coadder(qc: QuantumCircuit, y: int,
+                   br: QuantumRegister, cr: QuantumRegister, use_gates: bool=False):
+    """ Emit an n bit constant adder circuit
+
+        Effect:
+          [y, br, cr=0] -> [y, br+y, cr = 0]
+
+        :param qc: target circuit
+        :param y: left (circuit build time constant)
+        :param br: right (n+1 bits)
+        :param cr: carry (n-1 bits)
+    """
+    n = ut.bitsize(br) - 1
+    if not (ut.bitsize(br) == n+1 and ut.bitsize(cr) == n-1):
+        raise ValueError(
+            f"size mismatch: ar[{n}], cr[{ut.bitsize(cr)}]")
+    if use_gates:
+        k = 0
+        ybit = y & 1
+        qc.append(bb.cohcarry_gate(ybit), [br[k], cr[k]])
+        for k in range(1, n-1):
+            ybit = (y >> k) & 1
+            qc.append(bb.cocarry_gate(ybit), [cr[k-1], br[k], cr[k]])
+        k = n - 1
+        ybit = (y >> k) & 1
+        qc.append(bb.cocarry_gate(ybit), [cr[k-1], br[k], br[k+1]])
+        if ybit:
+            qc.x(br[k])
+        qc.append(bb.coqsum_gate(y), [cr[k-1], br[k]])
+
+        for k in range(n-2, 0, -1):
+            ybit = (y >> k) & 1
+            qc.append(bb.icocarry_gate(ybit), [cr[k-1], y, br[k], cr[k]])
+            qc.append(bb.cosum_gate(ybit), [cr[k-1], br[k]])
+
+        k = 0
+        ybit = y & 1
+        qc.append(bb.icohcarry_gate(ybit), [br[k], cr[k]])
+        qc.append(bb.cosum_gate(ybit), [cr[k], br[k]])
+    else:
+        k = 0
+        ybit = y & 1
+        bb.cohcarry(qc, ybit, br[k], cr[k])
+        for k in range(1, n-1):
+            ybit = (y >> k) & 1
+            bb.cocarry(qc, cr[k-1], y, br[k], cr[k])
+
+        k = n - 1
+        ybit = (y >> k) & 1
+        bb.cocarry(qc, cr[k-1], ybit, br[k], br[k+1])
+        if ybit:
+            qc.x(br[k])
+        bb.cosum(qc, cr[k-1], ybit, br[k])
+
+        for k in range(n-2, 0, -1):
+            ybit = (y >> k) & 1
+            bb.icocarry(qc, cr[k-1], ybit, br[k], cr[k])
+            bb.cosum(qc, cr[k-1], ybit, br[k])
+
+        k = 0
+        ybit = y & 1
+        bb.icohcarry(qc, ybit, br[k], cr[k])
+        bb.cohsum(qc, ybit, br[k])
+
+def unsigned_coadder_gate(n: int, y: int, label: str="ucoadd", use_gates: bool=False) -> Gate:
+    """ Create an unsigned constant adder gate.
+
+        Usage:
+          qc.append(unsigned_coadder_gate(n, y), [b1,...,bn, c1,...,cn-1])
+
+        Effect:
+          [y, b, c=0] -> [y, b+y, c=0]
+
+        :param n: bit size of b - 1
+        :param y: constant value to add
+        :param label: label to put on the gate
+    """
+    br = QuantumRegister(n+1, "b")
+    cr = QuantumRegister(n-1, "c")
+    qc = QuantumCircuit(br, cr)
+    unsigned_coadder(qc, y, br, cr, use_gates=use_gates)
+    return qc.to_gate(label=f"{label}({n},{y})")
+
 def unsigned_adder(qc: QuantumCircuit, ar: QuantumRegister,
                    br: QuantumRegister, cr: QuantumRegister, use_gates: bool=False):
     """ Emit an n bit adder circuit

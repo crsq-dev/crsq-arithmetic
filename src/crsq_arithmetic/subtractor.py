@@ -84,6 +84,73 @@ def unsigned_subtractor_gate(n: int, label: str="usub", use_gates: bool=False) -
     return qc.to_gate(label=f"{label}({n})")
 
 
+def unsigned_cosubtractor(qc: QuantumCircuit, y: int,
+                          br: QuantumRegister, cr: QuantumRegister,
+                          use_gates: bool = False):
+    """ Emit an unsigned subtractor.
+        It is actually a revsersed n bit adder circuit.
+
+        Note:
+          This is the reverse operation of br = ar + br.
+          The order of ar and br is not intuitive.
+
+        Effect:
+          [ar, br+ar, cr=0] -> [ar, br, cr=0]
+        
+        :param qc: target circuit
+        :param ar: left (n bits)
+        :param br: right (n+1 bits)
+        :param cr: carry (n bits)
+    """
+    m = ut.bitsize(br)
+    n = m + 1
+    nc = ut.bitsize(cr)
+    if not (nc == n - 1):
+        raise ValueError(
+            f"size mismatch: br[{ut.bitsize(br)}], cr[{ut.bitsize(cr)}]")
+    if use_gates:
+        k = 0
+        ybit = y & 1
+        qc.append(bb.icohsum_gate(ybit), [br[k]])
+        qc.append(bb.cohcarry_gate(ybit), [br[k], cr[k]])
+
+        for k in range(1, n-1):
+            ybit = (y >> k) & 1
+            qc.append(bb.icosum_gate(ybit), [cr[k-1], br[k]])
+            qc.append(bb.cocarry_gate(ybit), [cr[k-1], br[k], cr[k]])
+        k = n-1
+        ybit = (y >> k) & 1
+        qc.append(bb.icosum_gate(ybit), [cr[k-1], br[k]])
+        if ybit:
+            qc.x(br[k])
+        qc.append(bb.icocarry_gate(ybit), [cr[k-1], br[k], br[k+1]])
+        for k in range(n-2, 0, -1):
+            qc.append(bb.icocarry_gate(ybit), [cr[k-1], br[k], cr[k]])
+        k = 0
+        qc.append(bb.icohcarry_gate(ybit), [br[k], cr[k]])
+    else:
+        k = 0
+        ybit = y & 1
+        bb.icohsum(qc, ybit, br[k])
+        bb.cohcarry(qc, ybit, br[k], cr[k])
+        for k in range(1, n-1):
+            ybit = (y >> k) & 1
+            bb.icosum(qc, cr[k-1], ybit, br[k])
+            bb.cocarry(qc, cr[k-1], ybit, br[k], cr[k])
+        k = n-1
+        ybit = (y >> k) & 1
+        bb.icosum(qc, cr[k-1], ybit, br[k])
+        if ybit:
+            qc.x(br[k])
+        bb.icocarry(qc, cr[k-1], ybit, br[k], br[k+1])
+
+        for k in range(n-2, 0, -1):
+            ybit = (y >> k) & 1
+            bb.icocarry(qc, cr[k-1], ybit, br[k], cr[k])
+        k = 0
+        ybit = y & 1
+        bb.icohcarry(qc, ybit, br[k], cr[k])
+
 def unsigned_subtractorv(qc: QuantumCircuit, ar: QuantumRegister,
                          br: QuantumRegister, cr: QuantumRegister, use_gates: bool=False):
     """ Emit a revsersed n bit adder circuit.
@@ -179,8 +246,8 @@ def unsigned_subtractorv_gate(m, n, label="usubv", use_gates: bool=False):
 
 
 def signed_cosubtractor(qc: QuantumCircuit, y: int,
-                  br: QuantumRegister, cr: QuantumRegister,
-                  use_gates: bool = False):
+                        br: QuantumRegister, cr: QuantumRegister,
+                        use_gates: bool = False):
     """ Emit a signed constant subtractor circuit.
 
         Effect:

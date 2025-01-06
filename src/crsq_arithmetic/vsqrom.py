@@ -66,7 +66,7 @@ def vsqrom2(qc: QuantumCircuit, qk: QuantumRegister, qd: list[QuantumRegister],
     nctrl = len(qctrl)
     ntmp = len(qtmp)
     ndata = len(data)
-    if not (ntmp == nkey and nctrl == 1 and ndata == 2*nkey):
+    if not (ntmp == nkey and (nctrl == 0 or nctrl == 1) and ndata == 2*nkey):
         raise ValueError(f"size mismatch: qk[{nkey}], qd[{nval}], qctrl[{nctrl}] qtmp[{ntmp}] data[{ndata}]")
     j = nkey - 1
 
@@ -98,7 +98,24 @@ def vsqrom2(qc: QuantumCircuit, qk: QuantumRegister, qd: list[QuantumRegister],
 
 def _do_half(qc: QuantumCircuit, qk: QuantumRegister, qtmp: QuantumRegister, j: int, qd: QuantumRegister, data: list, k):
     qc.ccx(qk[j], qtmp[j+1], qtmp[j], ctrl_state='10')
+    # qc.barrier()
     _set_data(qc, qtmp[j], qd, data[k])
+    # qc.barrier()
     qc.cx(qtmp[j+1], qtmp[j])
+    # qc.barrier()
     _set_data(qc, qtmp[j], qd, data[k+1])
+    # qc.barrier()
     qc.ccx(qk[j], qtmp[j+1], qtmp[j])
+
+def vsqrom2_gate(nkey: int, ndata_bits: list[int], data: list[list[int]], num_ctrl = 0, label="vsqrom2"):
+    qx = QuantumRegister(nkey, "x")
+    num_reg = len(ndata_bits)
+    qd = [QuantumRegister(ndata_bits[i], f"a{i}") for i in range(num_reg)]
+    qtmp = QuantumRegister(nkey, "tmp")
+    qctrl = QuantumRegister(num_ctrl, "ctrl")
+    if (num_ctrl > 0) :
+        qc = QuantumCircuit(qx, *qd, qctrl, qtmp)
+    else:
+        qc = QuantumCircuit(qx, *qd, qtmp)
+    vsqrom2(qc, qx, qd, qctrl, qtmp, data)
+    return qc.to_gate(label=f"{label}({nkey})")

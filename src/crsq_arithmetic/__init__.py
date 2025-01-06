@@ -47,6 +47,7 @@ from crsq_arithmetic.adder import (
     signed_adder, signed_adder_gate,
     signed_adderv, signed_adderv_gate,
     unsigned_adder, unsigned_adder_gate,
+    unsigned_coadder, unsigned_coadder_gate,
     unsigned_adderv, unsigned_adderv_gate,
     controlled_signed_adder, controlled_signed_adder_gate,
     controlled_signed_adderv, controlled_signed_adderv_gate,
@@ -58,6 +59,7 @@ names = [
     "signed_adder", "signed_adder_gate",
     "signed_adderv", "signed_adderv_gate",
     "unsigned_adder", "unsigned_adder_gate",
+    "unsigned_coadder", "unsigned_coadder_gate",
     "unsigned_adderv", "unsigned_adderv_gate",
     "controlled_signed_adder", "controlled_signed_adderv"
 ]
@@ -183,10 +185,10 @@ names += [
 ]
 
 from crsq_arithmetic.vsqrom import (
-    vsqrom1, vsqrom2
+    vsqrom1, vsqrom2, vsqrom2_gate
 )
 
 names += [
-    "vsqrom1", "vsqrom2"
+    "vsqrom1", "vsqrom2", "vsqrom2_gate"
 ]
 __all__ = names
