@@ -428,10 +428,12 @@ class IAdd(BinaryOp):
         qc = self.scope.circuit
         if self.scope.is_verbose:
             print(
-                "scoadder(y) [br] -> [br(br+ar)] "
-                + f"y:{aval}, "
-                + f"br:{self.register_name_with_precision()}, cr:{carry1.name}"
-            )
+                "scoadderv(y) [br] -> [br(br+ar)] " +
+                f"y:{aval}, " +
+                f"br:{self.register_name_with_precision()}, cr:{carry1.name}")
+        if self.right.value == 0:
+            """ special case for zero """
+            return
         if self.scope.use_gates:
             qc.append(
                 ari.scoadder_gate(self.total_bits, aval), self.register[:] + carry1[:]
@@ -526,6 +528,9 @@ class IAdd(BinaryOp):
     def _emit_inverse_circuit_for_scoadder(self):
         """mismatch bitsize signed const adder version"""
         assert isinstance(self.right, Constant)
+        if self.right.value == 0:
+            """ special case for zero """
+            return
         aval = self.right.value * (1 << self.right.fraction_bits)
         carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
         qc = self.scope.circuit
@@ -666,6 +671,10 @@ class ISub(BinaryOp):
         we must use scoadderv with y = right, and br = left.
         """
         assert isinstance(self.right, Constant)
+        print(f"ISub: signed_cosubtractor. value = {self.right.value}")
+        if self.right.value == 0:
+            """ special case for zero """
+            return
         aval = int(self.right.value * (1 << self.right.fraction_bits))
         carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
         qc = self.scope.circuit
@@ -762,6 +771,9 @@ class ISub(BinaryOp):
     def _emit_inverse_circuit_for_signed_cosubtractor(self):
         """mismatch bitsize signed const adder version"""
         assert isinstance(self.right, Constant)
+        if self.right.value == 0:
+            """ special case for zero """
+            return
         aval = self.right.value * (1 << self.right.fraction_bits)
         carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
         qc = self.scope.circuit
