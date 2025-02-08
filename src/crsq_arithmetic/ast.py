@@ -671,7 +671,8 @@ class ISub(BinaryOp):
         we must use scoadderv with y = right, and br = left.
         """
         assert isinstance(self.right, Constant)
-        print(f"ISub: signed_cosubtractor. value = {self.right.value}")
+        if self.scope.is_verbose:
+            print(f"ISub: signed_cosubtractor. value = {self.right.value}")
         if self.right.value == 0:
             """ special case for zero """
             return
