@@ -103,11 +103,11 @@ def unsigned_cosubtractor(qc: QuantumCircuit, y: int,
         :param cr: carry (n bits)
     """
     m = ut.bitsize(br)
-    n = m + 1
+    n = m - 1
     nc = ut.bitsize(cr)
     if not (nc == n - 1):
         raise ValueError(
-            f"size mismatch: br[{ut.bitsize(br)}], cr[{ut.bitsize(cr)}]")
+            f"size mismatch: br[{ut.bitsize(br)}], cr[{ut.bitsize(cr)} should be {n-1}]")
     if use_gates:
         k = 0
         ybit = y & 1

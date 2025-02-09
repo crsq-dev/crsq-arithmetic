@@ -423,7 +423,7 @@ class IAdd(BinaryOp):
         we must use scoadderv with y = right, and br = left.
         """
         assert isinstance(self.right, Constant)
-        aval = int(self.right.value * (1 << self.right.fraction_bits))
+        aval = self.right.value
         carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
         qc = self.scope.circuit
         if self.scope.is_verbose:
@@ -495,7 +495,7 @@ class IAdd(BinaryOp):
         we must use scoadderv with y = right, and br = left.
         """
         assert isinstance(self.right, Constant)
-        aval = int(self.right.value * (1 << self.right.fraction_bits))
+        aval = self.right.value
         carry1 = self.scope.allocate_temp_register(self.total_bits - 2)
         qc = self.scope.circuit
         if self.scope.is_verbose:
@@ -531,7 +531,7 @@ class IAdd(BinaryOp):
         if self.right.value == 0:
             """ special case for zero """
             return
-        aval = self.right.value * (1 << self.right.fraction_bits)
+        aval = self.right.value
         carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
         qc = self.scope.circuit
         if self.scope.is_verbose:
@@ -582,7 +582,7 @@ class IAdd(BinaryOp):
     def _emit_inverse_circuit_for_ucoadder(self):
         """mismatch bitsize unsigned const adder version"""
         assert isinstance(self.right, Constant)
-        aval = int(self.right.value * (1 << self.right.fraction_bits))
+        aval = self.right.value
         carry1 = self.scope.allocate_temp_register(self.total_bits - 2)
         qc = self.scope.circuit
         if self.scope.is_verbose:
@@ -676,12 +676,12 @@ class ISub(BinaryOp):
         if self.right.value == 0:
             """ special case for zero """
             return
-        aval = int(self.right.value * (1 << self.right.fraction_bits))
+        aval = self.right.value
         carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
         qc = self.scope.circuit
         if self.scope.is_verbose:
             print(
-                "signed_cosubtractor(y) [br] -> [br(br-ar)] "
+                "signed_cosubtractor(y) [br] -> [br(br-y)] "
                 + f"y:{aval}, "
                 + f"br:{self.register_name_with_precision()}, cr:{carry1.name}"
             )
@@ -720,8 +720,8 @@ class ISub(BinaryOp):
         we must use scoadderv with y = right, and br = left.
         """
         assert isinstance(self.right, Constant)
-        aval = int(self.right.value * (1 << self.right.fraction_bits))
-        carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
+        aval = self.right.value
+        carry1 = self.scope.allocate_temp_register(self.total_bits - 2)
         qc = self.scope.circuit
         if self.scope.is_verbose:
             print(
@@ -731,7 +731,7 @@ class ISub(BinaryOp):
             )
         if self.scope.use_gates:
             qc.append(
-                ari.unsigned_cosubtractor_gate(self.total_bits, aval),
+                ari.unsigned_cosubtractor_gate(self.total_bits-1, aval),
                 self.register[:] + carry1[:],
             )
         else:
@@ -740,9 +740,12 @@ class ISub(BinaryOp):
 
     def _emit_circuit_for_usubtractorv(self):
         """emit for unsigned subtractor for mismatched input"""
+        assert isinstance(self.right, QuantumValue)
+        if self.right.value == 0:
+            """ special case for zero """
+            return
         carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
         qc = self.scope.circuit
-        assert isinstance(self.right, QuantumValue)
         if self.scope.is_verbose:
             print(
                 "unsigned_subtractorv [ar,br] -> [ar, br(br-ar)] "
@@ -767,7 +770,10 @@ class ISub(BinaryOp):
             else:
                 self._emit_inverse_circuit_for_ssubtractorv()
         else:
-            self._emit_inverse_circuit_for_usubtractorv()
+            if self.right_is_constant:
+                self._emit_inverse_circuit_for_ucosubtractor()
+            else:
+                self._emit_inverse_circuit_for_usubtractorv()
 
     def _emit_inverse_circuit_for_signed_cosubtractor(self):
         """mismatch bitsize signed const adder version"""
@@ -775,7 +781,7 @@ class ISub(BinaryOp):
         if self.right.value == 0:
             """ special case for zero """
             return
-        aval = self.right.value * (1 << self.right.fraction_bits)
+        aval = self.right.value
         carry1 = self.scope.allocate_temp_register(self.total_bits - 1)
         qc = self.scope.circuit
         if self.scope.is_verbose:
@@ -785,7 +791,7 @@ class ISub(BinaryOp):
                 + f"br:{self.register_name_with_precision()}, cr:{carry1.name}"
             )
         inv_gate = _make_dagger_gate(
-            ari.signed_cosubtractor_gate(self.register.size, aval)
+            ari.signed_cosubtractor_gate(self.total_bits, aval)
         )
         qc.append(inv_gate, self.register[:] + carry1[:])
         self.scope.free_temp_register(carry1)
@@ -805,6 +811,31 @@ class ISub(BinaryOp):
             ari.signed_subtractorv_gate(self.right.register.size, self.register.size)
         )
         qc.append(inv_gate, self.right.register[:] + self.register[:] + carry1[:])
+        self.scope.free_temp_register(carry1)
+
+    def _emit_inverse_circuit_for_ucosubtractor(self):
+        """unmatched bitsize unsigned constant subtractor version
+        note that since left.total_bits > right.total_bits,
+        we must use scoadderv with y = right, and br = left.
+        """
+        assert isinstance(self.right, Constant)
+        if self.right.value == 0:
+            """ special case for zero """
+            return
+
+        aval = self.right.value
+        carry1 = self.scope.allocate_temp_register(self.total_bits - 2)
+        qc = self.scope.circuit
+
+        if self.scope.is_verbose:
+            print(
+                "inv ucoadder(y) [br] <- [br(br-ar)] "
+                + f"y:{aval}, "
+                + f"br:{self.register_name_with_precision()}, cr:{carry1.name}"
+            )
+            inv_gate = _make_dagger_gate(
+                ari.unsigned_cosubtractor_gate(self.total_bits-1, aval))
+            qc.append(inv_gate, self.register[:] + carry1[:])
         self.scope.free_temp_register(carry1)
 
     def _emit_inverse_circuit_for_usubtractorv(self):
@@ -1567,8 +1598,8 @@ class _ScopeImp(Scope):
                                       |<|     start_pos
                     |<------------------|     end_pos
         """
-        if operand.signed:
-            raise ValueError("adjust_precision can take unsigned values only.")
+        if operand.signed and new_high_bits is not None:
+            raise ValueError("sign bit expansion is not implemented yet.")
         if new_high_bits is None:
             new_high_bits = []
         if new_low_bits is None:
