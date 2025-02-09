@@ -76,6 +76,7 @@ from crsq_arithmetic.subtractor import (
     signed_subtractorv, signed_subtractorv_gate,
     signed_o_subtractor, signed_o_subtractor_gate,
     unsigned_subtractor, unsigned_subtractor_gate,
+    unsigned_cosubtractor, unsigned_cosubtractor_gate,
     unsigned_subtractorv, unsigned_subtractorv_gate
 )
 

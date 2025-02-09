@@ -87,7 +87,7 @@ def unsigned_subtractor_gate(n: int, label: str="usub", use_gates: bool=False) -
 def unsigned_cosubtractor(qc: QuantumCircuit, y: int,
                           br: QuantumRegister, cr: QuantumRegister,
                           use_gates: bool = False):
-    """ Emit an unsigned subtractor.
+    """ Emit an unsigned constant value subtractor.
         It is actually a revsersed n bit adder circuit.
 
         Note:
@@ -98,7 +98,7 @@ def unsigned_cosubtractor(qc: QuantumCircuit, y: int,
           [ar, br+ar, cr=0] -> [ar, br, cr=0]
         
         :param qc: target circuit
-        :param ar: left (n bits)
+        :param y: left (n bits)
         :param br: right (n+1 bits)
         :param cr: carry (n bits)
     """
@@ -150,6 +150,23 @@ def unsigned_cosubtractor(qc: QuantumCircuit, y: int,
         k = 0
         ybit = y & 1
         bb.icohcarry(qc, ybit, br[k], cr[k])
+
+
+def unsigned_cosubtractor_gate(n, y, label="ucosubv", use_gates: bool=False):
+    """ Create an unsigned constant subtractor gate.
+
+        Usage:
+            qc.append(unsigned_subtractorv_gate(y, n), [b1,...,bn, c1,...,cn])
+        
+        Effect:
+            [y+b, c=0] -> [b, c=0]
+    """
+    br = QuantumRegister(n+1, name="b")
+    cr = QuantumRegister(n-1, "c")
+    qc = QuantumCircuit(br, cr)
+    unsigned_cosubtractor(qc, y, br, cr, use_gates=use_gates)
+    return qc.to_gate(label=f"{label}({n})")
+
 
 def unsigned_subtractorv(qc: QuantumCircuit, ar: QuantumRegister,
                          br: QuantumRegister, cr: QuantumRegister, use_gates: bool=False):
