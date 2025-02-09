@@ -84,7 +84,8 @@ names += [
     "signed_subtractor", "signed_subtractor_gate",
     "signed_cosubtractor", "signed_cosubtractor_gate",
     "unsigned_subtractor", "unsigned_subtractor_gate",
-    "unsigned_subtractorv", "unsigned_subtractorv_gate"
+    "unsigned_subtractorv", "unsigned_subtractorv_gate",
+    "unsigned_cosubtractor", "unsigned_cosubtractor_gate",
 ]
 
 from crsq_arithmetic.cdk_subtractor import (
